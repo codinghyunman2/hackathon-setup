@@ -25,7 +25,7 @@
 
 **핵심 특징**
 - 화면 대화는 **한국어**, 저장 파일은 **영어** (Claude가 영어 스펙을 더 정확히 따라가서)
-- 모든 사용자 질문은 `AskUserQuestion` 도구로만 — 자유 입력 옵션 없음
+- 모든 사용자 질문은 `AskUserQuestion` 도구로만 — plain-text A/B/C 형식 금지 (자유 입력은 각 질문의 "Other"로 가능)
 - 진행 표시기 `🎯 [N/5]`로 비개발자가 위치를 항상 알 수 있음
 - 품질 검증 게이트: 필수 섹션 누락·`[가정: ...]` 마커 5개 이상 시 사용자에게 한 번 더 확인
 - `/plan` 자동 트리거 금지 — 비개발자가 CLAUDE.md 검토 후 직접 입력
@@ -53,21 +53,16 @@ git clone https://github.com/codinghyunman2/hackathon-setup.git ~/.claude/skills
 
 ## Usage
 
-Claude Code 세션에서 다음 중 하나로 호출하세요. 이 스킬은 `disable-model-invocation: true`로 설정되어 있어 **명시적 호출만** 동작합니다.
+이 스킬은 `disable-model-invocation: true` 로 설정되어 있어 **사용자가 직접 슬래시 커맨드를 입력해야만** 동작합니다. Claude가 자연어 대화에서 자동으로 호출하지 않습니다.
 
 ```text
 /hackathon-setup
 ```
 
-또는 한국어로:
-
-```text
-사내 해커톤 셋업 도와줘
-```
-
-```text
-자동화 PRD 만들어줘
-```
+**이 커맨드를 입력하면 좋은 상황** (입력은 항상 위 한 줄로):
+- 사내 해커톤에서 자동화 아이디어를 정리하고 싶을 때
+- "자동화 PRD 만들어줘" 같은 작업이 필요하다고 느낄 때
+- Claude에게 뭘 어떻게 시켜야 할지 막막할 때
 
 스킬이 끝나면 다음 출력이 표시됩니다.
 

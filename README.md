@@ -75,8 +75,25 @@ git clone https://github.com/codinghyunman2/hackathon-setup.git ~/.claude/skills
 
 👉 다음으로 할 일 (순서 중요!)
 1. CLAUDE.md 를 열어서 내용을 한 번 훑어봐 주세요.
-2. 내용이 마음에 들면, 직접 /plan 을 입력해 주세요.
+2. 내용이 마음에 들면, 아래 프롬프트를 그대로 복사해서 입력해 주세요:
+
+     /plan docs/PRD.md 를 읽고 단계별 실행 계획 세워줘. CLAUDE.md 의 Hand-off Notes 규칙을 반드시 지켜줘.
 ```
+
+### `/plan` 으로 이어가기
+
+종료 메시지에 안내된 대로, 아래 프롬프트를 그대로 복사해서 입력하시면 됩니다.
+
+```text
+/plan docs/PRD.md 를 읽고 단계별 실행 계획 세워줘. CLAUDE.md 의 Hand-off Notes 규칙을 반드시 지켜줘.
+```
+
+이 프롬프트는:
+- `docs/PRD.md` 위치를 명시해서 `/plan` 의 자체 인터뷰 단계를 건너뜁니다
+- `단계별` 키워드로 한 번에 큰 변경을 묶지 않고 검토 가능한 단위로 쪼개도록 유도합니다
+- `CLAUDE.md` 와 `Hand-off Notes` 를 명시해서 비개발자 컨텍스트(언어 정책, 인증 검증 규칙 등)가 계획에 반영되도록 보장합니다
+
+`/plan` 이 끝나면 계획을 검토한 뒤 마음에 들면 그대로 코드 생성까지 이어집니다.
 
 ## Repository structure
 

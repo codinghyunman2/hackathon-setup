@@ -163,11 +163,12 @@ Output a short Korean closing message:
    - 잘못 적힌 규칙이 있으면 지금 직접 고쳐도 돼요.
    - 이 파일은 앞으로 모든 클로드 세션에서 자동으로 읽혀요.
 
-2. 내용이 마음에 들면, 직접 아래 커맨드를 입력해 주세요:
+2. 내용이 마음에 들면, 아래 프롬프트를 그대로 복사해서 입력해 주세요:
 
-     /plan
+     /plan docs/PRD.md 를 읽고 단계별 실행 계획 세워줘. CLAUDE.md 의 Hand-off Notes 규칙을 반드시 지켜줘.
 
-   /plan 은 PRD를 읽고 실행 계획을 세워줘요.
+   이 프롬프트는 PRD 위치(docs/PRD.md)와 따라야 할 규칙(CLAUDE.md Hand-off Notes)을 /plan 에 한 번에 전달해줘서,
+   /plan 이 다시 묻지 않고 바로 계획 작성에 들어갑니다.
    계획을 검토한 뒤 마음에 들면 그대로 코드 생성까지 이어집니다.
 ```
 
@@ -176,6 +177,7 @@ Output a short Korean closing message:
 - Reason: non-developers must read `CLAUDE.md` before development starts. The file becomes a persistent rule set for every future Claude Code session in this project, and silent mistakes (wrong scope, wrong constraints, wrong success criteria) propagate everywhere downstream. Skipping the review step is a high-risk shortcut for this audience.
 - Implementation: end the skill after printing the closing message. Do not call `Skill(skill="plan")`, do not run `/plan` via Bash, do not chain into any planner agent. The user types `/plan` themselves when they are ready.
 - If the user replies "그냥 바로 plan 돌려줘" or similar, still refuse the auto-trigger and explain in one Korean sentence that CLAUDE.md 검토는 1~2분이면 끝나고, 그 뒤에 직접 `/plan` 을 입력해야 안전하다고 안내한다.
+- The recommended `/plan` prompt printed in the closing message is for the USER to paste — do NOT issue it yourself via Skill/Bash/agent chaining. Print it as plain text in the closing message and stop.
 
 ## References
 

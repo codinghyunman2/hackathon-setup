@@ -41,6 +41,16 @@
 - **Response**: Stop the skill. In Korean, explain the specific concern (e.g., "이 자동화는 [구체 사유]로 진행이 어려워 보여요") and suggest scoped alternatives. Do NOT write a PRD for the unsafe version. Offer to restart with a modified scope.
 - **Why**: The skill should not launder unsafe requests into structured specs. Refusing at intake is far cheaper than refusing during implementation.
 
+### F14. Quick-input mode (1~2 sentence entry) produces too-vague draft
+- **Trigger**: User selected "한두 문장만 말할게요" in Step 1, but their 1-2 sentence input is too generic for Claude to confidently fill any 6-section guesses (e.g., "업무 자동화하고 싶어요" or "더 편하게 일하고 싶어요").
+- **Response**: Do NOT proceed with a fully-fabricated draft. Reply once in Korean: "조금 더 구체적으로 알려주시면 더 좋은 초안을 만들어드릴 수 있어요. 예를 들어 (a) 어떤 업무가 (b) 얼마나 자주 (c) 어떤 결과물이 나오면 좋겠는지 한두 문장 더 부탁드려요." Wait for one more reply. If still too vague after second attempt, fall back to template mode (show the 6-section template) instead of guessing.
+- **Why**: Quick-input mode is for users who have a *specific* idea but are reluctant to write a long brief. It is NOT for users who have no idea what they want — those need the template to anchor.
+
+### F15. Build method "잘 모르겠어요" — Claude recommends but user wants both
+- **Trigger**: In Step 3, user picks "잘 모르겠어요 — 추천해주세요" for build method. Claude suggests one (e.g., n8n based on PRD content). User replies "둘 다 만들고 싶어요" or "Claude Code도 해보고 싶고 n8n도 해보고 싶어요".
+- **Response**: Pick ONE for this PRD. Explain in one Korean sentence: "이번 셋업에서는 한 가지만 정해서 끝까지 가야 6시간 안에 결과물이 나와요. 추천한 [방식]으로 우선 진행하고, 끝나면 다른 방식도 직접 시도해보실 수 있어요." If the user insists, default to the Claude recommendation and proceed.
+- **Why**: Producing both `docs/PRD.md → code` and `docs/n8n-workflow.md` in parallel doubles cognitive load. 6시간 안에 한 가지를 *완성*하는 것이 두 가지를 *시작*하는 것보다 가치 높음.
+
 ## Mechanical failures
 
 ### F8. `Read` of `docs/PRD.md` or `CLAUDE.md` returns file-not-found in Step 0

@@ -37,10 +37,10 @@ Execute these steps in order. Every user question must be issued via the AskUser
 
 Concrete labels to use:
 - Step 0 (only when a conflict exists): `🎯 [0/5] 기존 파일 확인 · 1분 이내`
-- Step 1: `🎯 [1/5] 아이디어 입력 · 약 3–5분`
+- Step 1: `🎯 [1/5] 아이디어 입력 · 약 1–5분` (Quick 모드 1분, Template 모드 3–5분)
 - Step 2: `🎯 [2/5] 빠진 정보 확인 질문 · 약 2–4분`
 - Step 3: `🎯 [3/5] 자동화 설계서(docs/PRD.md) 만들기 · 약 2–3분`
-- Step 4: `🎯 [4/5] 클로드 규칙 파일(CLAUDE.md) 만들기 · 약 2–3분`
+- Step 4: `🎯 [4/5] 클로드 규칙 파일(CLAUDE.md) {+ n8n 워크플로우} 만들기 · 약 2–4분` (n8n 산출물은 build method가 n8n일 때만 추가 1~2분)
 - Step 5: `🎯 [5/5] 완료 — /plan 으로 넘기기`
 
 Skip the banner for Step 0 when no conflict is found (the step is silent in that case).
@@ -60,7 +60,27 @@ Before showing the template, inspect the project root for existing artifacts so 
 5. If the user picks `네, 덮어써요`, silently back up each existing file with Bash `cp` before any later Write (`docs/PRD.md` → `docs/PRD.md.bak`, `CLAUDE.md` → `CLAUDE.md.bak`). Do this now in Step 0 so later steps don't need to re-check. Do not mention `.bak` filenames during the conversation — the user only needs to know a backup exists if they ask.
 6. There is no "수정 모드" branch. Re-running the skill always regenerates fresh drafts from Step 1. If the user wants to keep parts of the old file, they edit the file directly after `/hackathon-setup` finishes.
 
-### Step 1: Template guidance + input collection
+### Step 1: Entry mode + input collection
+
+Before showing the template, give the user a choice of how to start. PRD 작성 경험이 없는 비개발자에겐 빈 6섹션 템플릿이 그 자체로 진입 장벽이 됨 → 짧게 시작할 수 있는 옵션을 먼저 제시.
+
+#### Step 1a: Entry mode (필수)
+
+Call AskUserQuestion: "어떻게 시작하시겠어요?" with options:
+- `한두 문장만 말할게요 (Claude가 펼쳐드릴게요, 약 1분)` — Quick mode (Step 1b-quick로 진행). PRD 처음 써보는 비개발자 추천.
+- `템플릿 채우기 (꼼꼼하게, 약 5분)` — Template mode (Step 1b-template로 진행). 이미 머릿속에 그림이 잡힌 사람 추천.
+- `예시부터 볼래요` — Read `references/examples/example_prd.md` 핵심 1~2 섹션을 화면에 발췌해서 보여준 뒤, 다시 위 2개 옵션 중 하나로 라우팅.
+
+#### Step 1b-quick: Quick mode (1~2문장 → Claude가 6섹션 추측)
+
+1. Ask in plain Korean: "어떤 업무를 자동화하고 싶으세요? 한두 문장으로 자유롭게 말씀해주세요. (예: '매주 광고 리포트 만드는 게 너무 오래 걸려서 슬랙으로 자동 발송됐으면 좋겠어요')"
+2. Receive a single free-text reply.
+3. **Vagueness check (per failure mode F14)**: 만약 답변이 1줄 미만이거나 "자동화하고 싶어요" 수준의 일반론이면, 한 번만 더 묻기 — "(a) 어떤 업무가 (b) 얼마나 자주 (c) 어떤 결과물이 나오면 좋겠는지 한두 문장 더 부탁드려요." 두 번째 답변까지 너무 모호하면 Template mode로 폴백 (1b-template).
+4. Read `references/input_template_ko.md` (for the 7-section anchors — 3 필수 + 4 선택 including `🛠️ 만들 방식`) and **draft a 7-section Korean guess** based on the user's 1~2 sentences plus reasonable domain inference. Mark every guessed bullet with `[추측: ...]`. For `🛠️ 만들 방식`: if the user mentioned a specific tool (예: "n8n으로", "노코드로", "코드로"), capture it; otherwise set to `추천받을게요` (default — Step 3 will recommend).
+5. Show the draft on screen and ask in Korean: "이렇게 이해했는데 맞을까요? 틀린 부분이나 빠진 부분만 알려주세요. 그대로 좋으면 '맞아요' 라고 답해주세요."
+6. Accept their corrections (free text), update the 6-section draft, then proceed to Step 2. Carry the `[추측: ...]` markers forward — Step 2 will resolve them along with normal gaps.
+
+#### Step 1b-template: Template mode (현재 기본 흐름)
 
 Read `references/input_template_ko.md` and show its 6 sections inline. Each section already includes one example bullet so the user has something to anchor on.
 
@@ -68,6 +88,8 @@ Tell the user once, in plain Korean:
 - 어떤 섹션은 필수 (문제 / 원하는 것 / 사용 범위), 나머지는 선택이라는 점
 - 모르는 항목은 비워두거나 "잘 모르겠어요" 라고 써도 된다는 점
 - 답변은 한국어로 자유롭게 쓰면 된다는 점
+- 특히 **문제 섹션의 "지금 손으로 하는 단계 3~5개"는 꼭 채워주세요** — 자동화 어디를 맡길지 결정하는 핵심 정보예요.
+- **🛠️ 만들 방식 섹션은 잘 모르면 "추천받을게요"라고 쓰시면 돼요** — PRD 초안이 나오면 클로드가 두 가지 중 어떤 게 더 적합한지 추천해드려요.
 
 Then collect the bullets. Prefer a single long-form text reply over six separate AskUserQuestion calls — fewer interaction beats keeps non-developer users from dropping out. If the user replies with only a sentence or two, treat the missing sections as "TBD" and let Step 2 fill them in.
 
@@ -75,9 +97,13 @@ Then collect the bullets. Prefer a single long-form text reply over six separate
 
 Analyze the Step 1 input and find the highest-impact gaps. Read `references/clarification_questions.md` for a curated pool, then adapt the wording to the user's specific situation.
 
-Round 1: Pick up to 3 of the most critical missing pieces (typically: real frequency of the problem, where the output lives, who else uses the result). Call AskUserQuestion with one question at a time, each option carrying a concrete example answer (e.g., "주 1회 — 매주 월요일 오전").
+**Round 1 (필수)**: 다음 2개 질문은 *Step 1에서 이미 명확히 답변되지 않았다면 반드시 포함* — 6시간 해커톤의 성패를 좌우하는 변수임.
+1. **A4 (As-is 워크플로우 단계)** — 사용자가 지금 손으로 하는 단계 3~5개. 이게 없으면 자동화 진입점을 식별할 수 없음. Step 1에서 "단계가 잘 안 떠올라요" 라고 답했으면, 사용자의 Step 1 입력 + 도메인 상식으로 3~5단계 초안을 직접 작성해 보여주고 "이 흐름이 맞나요?"로 확인 받기.
+2. **F1 (시스템 접근 권한)** — 자동화에 필요한 시스템 접근 권한 보유 여부. 답이 "모르겠어요" / "일부만"이면 PRD section 12 (Access Risk)에 자동으로 `[Risk: 접근권한 사전 확인 필요]` 마킹.
 
-After Round 1, check the data model: do you now have enough to write `purpose`, `target_user`, `input_type`, `output_type`, `output_destination`, `frequency`, `scope` ? If yes, skip Round 2 — the user pays a fatigue cost for every avoidable question.
+**Round 1 남은 1개 슬롯**: Step 1 답변에서 가장 큰 갭(보통 출력 destination, 빈도, hard constraint 중 하나)을 하나 더 골라 묻기. Call AskUserQuestion with one question at a time, each option carrying a concrete example answer (e.g., "주 1회 — 매주 월요일 오전").
+
+After Round 1, check the data model: do you now have enough to write `purpose`, `target_user`, `as_is_workflow`, `access_status`, `input_type`, `output_type`, `output_destination`, `frequency`, `scope` ? If yes, skip Round 2 — the user pays a fatigue cost for every avoidable question.
 
 Round 2 (only if needed): up to 3 more questions on remaining gaps. After Round 2, stop asking — fill unknown fields with `[가정: ...]` markers and proceed.
 
@@ -86,20 +112,46 @@ Round 2 (only if needed): up to 3 more questions on remaining gaps. After Round 
 Print the progress banner `🎯 [3/5] 자동화 설계서(docs/PRD.md) 만들기 · 약 2–3분`.
 
 **Reference reading (mandatory before drafting)**:
-- Read `references/prd_template_en.md` for the section structure.
+- Read `references/prd_template_en.md` for the section structure (14 sections including Quick Facts, As-is workflow, MVP, Phase 2, Access Risk, Build Method).
 - Read `references/examples/example_prd.md` for the quality bar — a fully-completed PRD that shows the level of specificity, concreteness, and out-of-scope discipline to aim for. Mimic the level of detail, not the domain content.
 
-Compose a 10-section Korean summary on screen using that structure. Surface every assumption as `[가정: ...]` so the user can spot guesses. Use the friendly vocabulary mapping when naming the file.
+Compose a Korean summary on screen using the 14-section structure. Surface every assumption as `[가정: ...]` so the user can spot guesses. Use the friendly vocabulary mapping when naming the file.
 
-**Quality validation gate (run BEFORE the confirmation prompt)**:
+**Quality validation gates (run BEFORE the confirmation prompt — in order)**:
 
-1. Check that all required sections have at least one non-empty bullet: `Problem`, `Target User`, `Goals & Success Metrics`, `Inputs & Data Sources`, `Output`. If any of these is empty or TBD-only:
-   - Run ONE more targeted AskUserQuestion for the missing section's most critical sub-bullet (per failure mode F6 in `references/failure_modes.md`).
-   - If still empty after that single retry, save with `[가정: 이 항목은 셋업 중에 결정 못 함]` and continue.
-2. Count the number of `[가정: ...]` markers in the draft. If **5 or more**:
-   - Surface the count in Korean before showing the confirmation prompt: "가정으로 채운 항목이 N개예요. 더 답해주실래요, 아니면 가정 그대로 저장하고 `/plan` 단계에서 다듬을까요?"
-   - Call AskUserQuestion with two options: `더 답할게요 (확인 질문 한 라운드 더)` / `이대로 저장 (가정은 /plan에서 다듬기, 추천)`. If user picks the first, loop back to Step 2 for one extra round (this is the only exception to the Step 2 "max 2 rounds" cap, and it's user-initiated).
-3. Track a `confirmation_round_count`. Each time the user picks `수정할게요` in the next step, increment it. After 3 rounds, switch the confirmation prompt to the F4 wording in `references/failure_modes.md`. Hard cap at 5 rounds — past that, save and move on regardless.
+1. **Required content sections**: `Problem` (including As-is workflow), `Target User`, `Goals & Success Metrics`, `Inputs & Data Sources`, `Output`. If any is empty or TBD-only, run ONE more targeted AskUserQuestion for that section's most critical sub-bullet (per F6 in `references/failure_modes.md`). If still empty after that single retry, save with `[가정: 이 항목은 셋업 중에 결정 못 함]` and continue.
+
+2. **MVP gate (Section 10 필수)**: The "Hackathon MVP (6-hour scope)" section MUST be non-empty and describe a *single-trigger / single-output* version that fits 6 hours. If the draft section is empty or describes something too large:
+   - Call AskUserQuestion: "이번 해커톤 6시간 안에 끝낼 *최소 버전*은 무엇일까요? 욕심나는 나머지는 'Phase 2'로 자동 분리해드릴게요." with 2~3 options Claude crafts from the PRD content (e.g., `한 채널만 우선 — Meta Ads만 / 다른 데이터 소스는 Phase 2`).
+   - If user can't choose, Claude picks the smallest plausible option and asks for yes/no confirmation.
+   - Move everything else from `In scope` to Section 11 (Phase 2). Never silently drop user wishes — always relocate them to Phase 2.
+
+3. **Build Method gate (Section 13 필수)**: 두 분기로 처리.
+
+   **분기 A — Step 1에서 사용자가 이미 `Claude Code` 또는 `n8n` 중 하나를 선택한 경우 (input_template_ko.md `🛠️ 만들 방식` 섹션에 명시)**:
+   - 게이트 prompt를 띄우지 말고 *확인만* 받기. 1줄 표시: "만들 방식은 Step 1에서 선택하신 대로 **{선택}** 으로 진행할게요. 바꾸시려면 알려주세요."
+   - 사용자가 별다른 응답 없거나 "네"라고 하면 그대로 확정.
+   - 사용자가 "바꿀게요" 라고 하면 분기 B 처럼 묻기.
+
+   **분기 B — Step 1에서 `추천받을게요` 또는 빈칸/모름인 경우 (default path)**:
+   - Claude가 PRD 초안 내용 + Step 1의 "n8n 인스턴스 보유 여부" 신호를 종합해서 1줄 추천 작성. 휴리스틱:
+     - 외부 API 3개 이상 + 데이터 변환이 단순 → **n8n 추천**
+     - 커스텀 로직/AI 호출/복잡한 데이터 가공이 핵심 → **Claude Code 추천**
+     - n8n 인스턴스 보유 "아니요" 또는 "모르겠어요" → 자체 호스팅 부담 → **Claude Code 추천**
+     - n8n 인스턴스 보유 "네" + API 통합 중심 → **n8n 추천 강화**
+   - Call AskUserQuestion: "PRD 초안을 보니 **{Claude의 추천: Claude Code | n8n}** 이 더 맞아 보여요. **{이유 1줄}**. 이대로 진행할까요?" with options:
+     - `네, 추천대로 진행할게요 (추천)` — 추천 그대로 확정
+     - `다른 방식으로 할게요` — 사용자가 다른 옵션 직접 선택
+     - `잘 모르겠으니 추천대로 갈게요` — 추천 확정 (방어적 default)
+   - 사용자가 "둘 다 만들고 싶어요" 라고 하면 F15 (failure_modes)에 따라 하나만 골라 진행.
+
+4. **Access Risk gate (Section 12)**: Step 2 F1 답변을 그대로 PRD section 12에 반영. 만약 "일부만" 또는 "모르겠어요"였다면 PRD Quick Facts의 `Access risk` 필드를 `partial` 또는 `unknown — must verify first`로 자동 마킹. 이게 `unknown`인 PRD는 `/plan`이 첫 스텝을 권한 확인으로 잡도록 Hand-off Notes에 명시됨.
+
+5. **Section 0 (Quick Facts) 자동 채우기**: 위 게이트들 결과를 한 줄씩 자동 합성 — Build method / Hackathon MVP / Access risk / Category tag (Claude가 PRD 도메인 보고 카테고리 추론: marketing-report, hr-onboarding, cs-triage, sales-followup, ops-monitoring 등 중 1개). 빈 칸이 있으면 Section 0를 채우기 전 사용자에게 한 번 더 묻기.
+
+6. **`[가정: ...]` 카운트**: ≥ 5개면 F5 처리 (사용자에게 카운트 surface, 추가 라운드 vs 그대로 저장 선택).
+
+7. **`confirmation_round_count` 추적**: 다음 단계에서 `수정할게요` 누를 때마다 증가. 3회 → F4 wording, 5회 hard cap.
 
 Then call AskUserQuestion: "이대로 자동화 설계서(docs/PRD.md)로 저장할까요?" with options `네, 저장해요 (추천)`, `수정할게요`, `취소`. If `수정할게요`, accept their edits in free text, regenerate the Korean summary, and re-confirm.
 
@@ -107,7 +159,8 @@ On confirmation:
 1. Use Bash `mkdir -p docs` to guarantee the directory exists.
 2. Translate the confirmed summary into English using the structure in `references/prd_template_en.md`. Preserve every `[Assumption: ...]` tag (translated from `[가정: ...]`).
 3. Use Write to save to `docs/PRD.md`.
-4. Report the absolute path in one short Korean line: "저장 완료: docs/PRD.md".
+4. **Store build method** in working memory (will be used in Step 4 to decide whether to generate `docs/n8n-workflow.md`).
+5. Report the absolute path in one short Korean line: "저장 완료: docs/PRD.md".
 
 ### Step 4: CLAUDE.md Korean preview → English save
 
@@ -146,9 +199,40 @@ On confirmation:
 2. Use Write to save to `CLAUDE.md` at project root. (Backup of any prior `CLAUDE.md` was already made in Step 0, so no extra backup logic is needed here.)
 3. Report the absolute path.
 
+#### Step 4d: (조건부) n8n 워크플로우 산출물 생성
+
+**Trigger condition**: Step 3에서 결정된 build method가 `n8n`인 경우에만 실행. 그 외(`Claude Code`)면 이 단계 전체를 skip하고 Step 5로 진행.
+
+**Reference reading (mandatory)**:
+- Read `references/n8n_workflow_template_en.md` for the node-graph structure.
+- Read `references/examples/example_n8n_workflow.md` for the quality bar — 5-node MVP example. Mimic the level of node-type specificity (real n8n node names, real field configs), not the domain content.
+
+Generate a Korean preview of the n8n workflow draft using the template structure. Sections to fill:
+- Trigger (type + schedule/event + 1줄 근거)
+- Node sequence (3~7 노드, 각 노드별 Node type / Purpose / Key config / Output)
+- Branches & Error handling (MVP minimum — happy path + empty-data fallback)
+- Required Credentials (n8n Credentials store 기준; PRD section 12 Access Risk 와 일치시켜야 함)
+- Estimated complexity (node count / API 수 / 빌드 예상 시간 / 난이도)
+- What this does NOT cover (PRD section 11 Phase 2 verbatim 복사)
+- Visual reference (선택 — ASCII 체인 1줄)
+
+**Quality validation gate**:
+1. **Node count guard**: 노드 8개 이상이면 MVP 스코프 폭주 가능성 → 사용자에게 "노드가 N개네요. MVP에 너무 많을 수 있어요. Phase 2로 옮길 만한 게 있을까요?" 1회 확인.
+2. **Credential parity**: PRD section 12에서 `needs request` 마킹된 dependency는 n8n credentials 표에도 동일하게 `needs request`로 반영. 자동 동기화.
+3. **Node type 정확성**: 모든 node type이 실제 n8n에 존재하는 이름인지 확인 (Schedule Trigger / Webhook / HTTP Request / Set / IF / Switch / Code / Function / Slack / Google Sheets / Notion / ...). 가공의 노드 이름 금지.
+
+Call AskUserQuestion: "이 n8n 워크플로우 설계서를 저장할까요?" with options `네, 저장해요 (추천)`, `수정할게요`, `취소`. Apply the same `confirmation_round_count` cap as Steps 3/4c.
+
+On confirmation:
+1. Translate the confirmed Korean draft to English using `references/n8n_workflow_template_en.md`.
+2. Use Write to save to `docs/n8n-workflow.md`.
+3. Report the absolute path in one short Korean line: "저장 완료: docs/n8n-workflow.md".
+
 ### Step 5: Handoff to /plan (수동 트리거)
 
-Output a short Korean closing message:
+Output a short Korean closing message. **Build method에 따라 생성된 파일 목록과 권장 프롬프트가 다름** — 아래 두 분기 중 해당하는 것을 선택해서 출력.
+
+**분기 A: Build method = Claude Code**
 
 ```
 셋업이 끝났어요! 🎉
@@ -172,6 +256,34 @@ Output a short Korean closing message:
    계획을 검토한 뒤 마음에 들면 그대로 코드 생성까지 이어집니다.
 ```
 
+**분기 B: Build method = n8n**
+
+```
+셋업이 끝났어요! 🎉
+
+생성된 파일:
+- 자동화 설계서: docs/PRD.md
+- n8n 워크플로우 설계서: docs/n8n-workflow.md
+- 클로드 규칙 파일: CLAUDE.md
+
+👉 다음으로 할 일 (순서 중요!)
+
+1. CLAUDE.md 와 docs/n8n-workflow.md 를 한 번씩 훑어봐 주세요.
+   - 잘못 적힌 노드/필드가 있으면 지금 직접 고쳐도 돼요.
+   - PRD section 12 (Access Risk) 가 `needs request` 인 자격증명이 있으면 먼저 발급 요청 들어가세요 — 시간이 가장 오래 걸리는 항목이에요.
+
+2. n8n 인스턴스에 워크플로우를 만들 때:
+   - docs/n8n-workflow.md 의 노드 순서 그대로 드래그앤드롭하면 됩니다.
+   - 각 노드의 Key config 섹션을 그대로 복붙해서 채우세요.
+   - Required Credentials 표를 먼저 만들어두고 시작하세요.
+
+3. 막히거나 클로드와 추가 논의가 필요하면, 아래 프롬프트를 복사해서 입력해 주세요:
+
+     /plan docs/PRD.md 와 docs/n8n-workflow.md 를 읽고, n8n 인스턴스에서 단계별로 구현할 가이드를 만들어줘. CLAUDE.md 의 Hand-off Notes 규칙을 반드시 지켜줘.
+
+   이 프롬프트는 PRD + n8n 설계 + 규칙 3개를 한 번에 전달해줘서, /plan 이 노드별 빌드 가이드를 작성해줍니다.
+```
+
 **Critical rule — do NOT auto-trigger `/plan`.**
 
 - Reason: non-developers must read `CLAUDE.md` before development starts. The file becomes a persistent rule set for every future Claude Code session in this project, and silent mistakes (wrong scope, wrong constraints, wrong success criteria) propagate everywhere downstream. Skipping the review step is a high-risk shortcut for this audience.
@@ -181,13 +293,15 @@ Output a short Korean closing message:
 
 ## References
 
-- **`references/input_template_ko.md`** — 6-section Korean template with example bullets per section, shown to user in Step 1.
-- **`references/prd_template_en.md`** — English PRD structure (Problem, Goals, Users, Scope, Constraints, Success Metrics, Assumptions) used in Step 3.
-- **`references/claude_md_template_en.md`** — English CLAUDE.md structure (Project Overview, Primary User, Tech Constraints, Success Criteria, Out of Scope) used in Step 4.
-- **`references/clarification_questions.md`** — Pool of clarifying questions grouped by topic, source for Step 2.
-- **`references/examples/example_prd.md`** — Fully-completed PRD (Weekly Marketing Summary Bot). Quality bar for Step 3 — mimic the specificity, not the domain.
+- **`references/input_template_ko.md`** — 6-section Korean template (필수/선택 그룹화) with example bullets, shown to user in Step 1b-template.
+- **`references/prd_template_en.md`** — English PRD structure with 14 sections (Quick Facts, Problem with As-is workflow, MVP, Phase 2, Access Risk, Build Method, Assumptions, ...) used in Step 3.
+- **`references/claude_md_template_en.md`** — English CLAUDE.md structure (Project Overview, Primary User, Tech Constraints, Success Criteria, Out of Scope, Hand-off Notes) used in Step 4.
+- **`references/n8n_workflow_template_en.md`** — English n8n workflow doc structure (Trigger, Node sequence, Branches, Credentials, Complexity). Used in Step 4d (only when build method = n8n).
+- **`references/clarification_questions.md`** — Pool of clarifying questions grouped by topic (A=Problem, B=Output, C=Scope, D=Data, E=Constraints, F=Feasibility). Round 1 필수 항목 명시. Source for Step 2.
+- **`references/examples/example_prd.md`** — Fully-completed PRD (Weekly Marketing Summary Bot) showing all 14 sections including MVP/Phase 2/Access Risk/Build Method. Quality bar for Step 3 — mimic the specificity, not the domain.
 - **`references/examples/example_claude_md.md`** — Paired CLAUDE.md for the same example. Quality bar for Step 4.
-- **`references/failure_modes.md`** — Catalog of non-happy-path scenarios (F1–F13) covering conversational drift, content quality risks, mechanical failures, and recovery commands. Read once at the start of every run.
+- **`references/examples/example_n8n_workflow.md`** — 5-node n8n MVP example paired with the marketing bot PRD. Quality bar for Step 4d.
+- **`references/failure_modes.md`** — Catalog of non-happy-path scenarios (F1–F15) covering conversational drift, content quality risks, quick-mode vagueness (F14), build-method ambiguity (F15), mechanical failures, and recovery commands. Read once at the start of every run.
 
 ## Recovery Commands
 
@@ -209,15 +323,18 @@ This skill loads the following into context, in order:
 
 | When | File | Approx. size |
 |------|------|-------------:|
-| Session start (always, due to skills auto-load) | `SKILL.md` (frontmatter + first ~200 lines) | ~1.5k tokens |
-| Step 0 (always) | `references/failure_modes.md` | ~1.8k tokens |
-| Step 1 (always) | `references/input_template_ko.md` | ~0.7k tokens |
-| Step 2 (always) | `references/clarification_questions.md` | ~1.1k tokens |
-| Step 3 (always) | `references/prd_template_en.md` + `references/examples/example_prd.md` | ~2.7k tokens |
+| Session start (always, due to skills auto-load) | `SKILL.md` (frontmatter + ~280 lines) | ~2.2k tokens |
+| Step 0 (always) | `references/failure_modes.md` (F1–F15) | ~2.2k tokens |
+| Step 1 — Template mode only | `references/input_template_ko.md` | ~1.0k tokens |
+| Step 1 — Quick mode only | (no extra file load — Claude drafts directly) | ~0k tokens |
+| Step 2 (always) | `references/clarification_questions.md` | ~1.5k tokens |
+| Step 3 (always) | `references/prd_template_en.md` + `references/examples/example_prd.md` | ~3.4k tokens |
 | Step 4 (always) | `references/claude_md_template_en.md` + `references/examples/example_claude_md.md` | ~2.4k tokens |
-| **Full-run total** | | **~10k tokens** |
+| Step 4d — only when build method = n8n | `references/n8n_workflow_template_en.md` + `references/examples/example_n8n_workflow.md` (Store Review based) | ~3.6k tokens |
+| **Full-run total — Claude Code build path** | | **~12.7k tokens** |
+| **Full-run total — n8n build path** | | **~16.3k tokens** |
 
-Numbers are approximate (English averages ~4 chars/token, Korean ~2 chars/token). Reference these when deciding whether to add new files — adding a 5k-token file would meaningfully shift this skill's footprint.
+Numbers are approximate (English averages ~4 chars/token, Korean ~2 chars/token). Reference these when deciding whether to add new files — adding a 5k-token file would meaningfully shift this skill's footprint. Quick mode in Step 1 saves ~0.9k tokens compared to Template mode.
 
 ## Settings
 

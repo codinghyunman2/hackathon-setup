@@ -9,11 +9,19 @@ Use this exact structure when translating the confirmed Korean summary to Englis
 
 > One-line summary of what this automation does, written from the user's perspective.
 
+## 0. Quick Facts (frontmatter for reviewers)
+
+- **Build method**: {Claude Code | n8n | TBD — see section 11}
+- **Hackathon MVP**: {one-line description of what will be done in the 6-hour window}
+- **Access risk**: {none | partial — see section 12 | unknown — must verify first}
+- **Category tag**: {e.g., marketing-report | hr-onboarding | cs-triage | sales-followup | ops-monitoring}
+
 ## 1. Problem
 
 - What is the current pain point?
 - How often does it happen and how much time/effort does it cost?
 - How is it being solved today (manual? spreadsheet? other tool?)?
+- **As-is workflow (3~5 step list)** — concrete sequence the user performs by hand today.
 
 ## 2. Target User
 
@@ -25,11 +33,11 @@ Use this exact structure when translating the confirmed Korean summary to Englis
 
 - Primary goal in one sentence
 - Concrete success metric (time saved, error rate reduced, frequency of use, etc.)
-- Definition of "done" for the hackathon scope
+- Definition of "done" for the hackathon scope (must match section 10 MVP)
 
 ## 4. Scope
 
-### In scope (MVP)
+### In scope (Hackathon MVP — must fit in 6 hours)
 - Capability 1
 - Capability 2
 - ...
@@ -54,7 +62,7 @@ Use this exact structure when translating the confirmed Korean summary to Englis
 
 - Single user / team-internal / public
 - Headcount
-- Deployment target (local execution / internal server / external host like Vercel)
+- Deployment target (local execution / internal server / external host like Vercel / n8n self-hosted)
 
 ## 8. Constraints & Non-Negotiables
 
@@ -65,7 +73,31 @@ Use this exact structure when translating the confirmed Korean summary to Englis
 
 - Comparable products or examples the user mentioned
 
-## 10. Assumptions
+## 10. Hackathon MVP (6-hour scope)
+
+- The single smallest end-to-end version that delivers value in 6 hours of work.
+- Must be testable: one trigger, one happy-path output, no edge cases.
+- This is what `/plan` will optimize for. Anything else lives in section 11.
+
+## 11. Phase 2 (Post-Hackathon)
+
+- Features the user wants but does NOT fit in 6 hours.
+- Listed here intentionally so they are not lost, but `/plan` will not implement them in the hackathon scope.
+- Examples: edge case handling, advanced filters, multi-channel delivery, retro analytics.
+
+## 12. Access Risk & Pre-requisites
+
+- What system access / credentials are required (Slack token, Google Sheets API, internal DB account, ...)
+- Current status: {confirmed available | needs request | unknown}
+- If status is anything other than "confirmed available", the first `/plan` step must be a verification/request step before any code is written.
+
+## 13. Build Method
+
+- **Selected**: {Claude Code | n8n | TBD}
+- **Why this fits** (one line): e.g., "n8n suits this because 4+ external API integrations dominate the workflow" / "Claude Code suits this because custom data transformation logic is needed".
+- **If n8n is selected**: a companion file `docs/n8n-workflow.md` will be produced alongside this PRD.
+
+## 14. Assumptions
 
 - [Assumption: ...]
 - [Assumption: ...]
@@ -81,4 +113,6 @@ Use this exact structure when translating the confirmed Korean summary to Englis
 - Keep proper nouns (Airbridge, Meta, Notion, etc.) as-is.
 - Translate Korean role names to natural English (예: "성과 마케터" → "Performance Marketer").
 - When a Korean bullet is ambiguous, prefer the conservative interpretation rather than over-specifying — `/plan` will surface uncertainty later.
+- **Section 0 (Quick Facts)** is the operator-facing summary. Each line MUST be filled — never blank. Use `TBD` only as a last resort and only if the user explicitly chose to defer.
+- **Sections 10–13 are mandatory** — if any is empty in the Korean draft, surface a final clarifying question before saving (per Step 3 validation gates in `SKILL.md`).
 - Final line of the PRD must always be the "Run `/plan` next" pointer.

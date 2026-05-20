@@ -26,6 +26,13 @@ Each question below carries 2-3 example options so the AskUserQuestion call has 
 - 다른 사람한테 부탁
 - 그냥 참고 안 함
 
+### A4. As-is workflow steps (★ Round 1 필수 — 자동화 진입점 식별의 핵심)
+**Question**: "지금 손으로 하는 단계를 3~5개로 나눠 알려주세요. 짧게 써도 괜찮아요." (free-text 권장; AskUserQuestion 옵션은 가이드용)
+- 예시 1) "① Meta Ads에서 CSV 다운 → ② 구글시트 A에 붙여넣기 → ③ 함수로 가공 → ④ 슬랙에 복붙"
+- 예시 2) "① 고객 문의 메일 확인 → ② 카테고리 분류 → ③ 담당자 지정 → ④ 노션에 기록"
+- "단계가 잘 안 떠올라요" — Claude가 짐작해서 초안 제시 후 사용자가 수정
+- **Why this matters**: 자동화는 "어디 한 단계를 기계에 맡길 것인가"의 결정. 단계가 안 보이면 /plan이 추측에 의존해서 어색해짐.
+
 ---
 
 ## Group B — Output expectation (use when "원하는 것" is vague)
@@ -94,6 +101,24 @@ Each question below carries 2-3 example options so the AskUserQuestion call has 
 
 ---
 
+## Group F — Feasibility (★ Round 1 필수 — 6시간 안에 끝낼 수 있는지의 핵심 변수)
+
+### F1. System access permission
+**Question**: "이 자동화에 필요한 시스템에 접근 권한이 있어요? (예: Slack 워크스페이스 권한, 구글 시트, 사내 DB, 광고 플랫폼 계정)"
+- 네, 모두 있어요 / 받을 수 있어요
+- 일부만 있어요 — 추가 권한 신청이 필요해요
+- 모르겠어요 / 사내 IT 확인 필요해요
+- **Why this matters**: 권한 없으면 6시간 안에 완성 불가. PRD에 자동으로 `[Risk: 접근권한 사전 확인 필요]` 마킹. /plan이 첫 스텝을 권한 확인으로 잡도록 유도.
+
+### F2. Build method preference (Step 3 후반에서 다시 묻지만, 사전에 신호가 있으면 캡처)
+**Question**: "혹시 어떤 방식으로 만들고 싶다는 생각이 있어요?"
+- Claude Code로 코드 짜고 싶어요
+- n8n 같은 노드 연결 툴로 만들고 싶어요
+- 잘 모르겠어요 — 추천해주세요
+- **Why this matters**: 후속 산출물(`docs/n8n-workflow.md` 생성 여부)을 결정. 사용자가 미정이면 Claude가 PRD 내용 기반 1줄 추천.
+
+---
+
 ## Group E — Constraints (use when checking blockers)
 
 ### E1. Hard no
@@ -118,11 +143,18 @@ Each question below carries 2-3 example options so the AskUserQuestion call has 
 
 ## Question selection heuristic
 
-For each round, prioritize this order:
-1. **B1/B2** — output form and destination (highest impact on /plan accuracy)
-2. **A1** — frequency (determines whether automation is worth it)
-3. **C1/C3** — user scope and deployment (affects security/architecture)
-4. **D1/D3** — data source and integrations (determines tool needs)
-5. **E1** — hard constraints (prevents wasted /plan output)
+**Round 1 (필수 — 다음 2개는 항상 포함, 답이 이미 Step 1에서 분명하면 skip)**:
+1. **A4** — As-is 단계 캡처 (자동화 진입점 식별)
+2. **F1** — 시스템 접근 권한 (6시간 안 완성 가능성)
+
+**Round 1 나머지 슬롯 (남은 1개) — 다음 우선순위로 선택**:
+3. **B1/B2** — output form and destination (highest impact on /plan accuracy)
+4. **A1** — frequency (determines whether automation is worth it)
+5. **C1/C3** — user scope and deployment (affects security/architecture)
+6. **D1/D3** — data source and integrations (determines tool needs)
+7. **E1** — hard constraints (prevents wasted /plan output)
+8. **F2** — build method (n8n vs Claude Code) — Step 3에서 다시 확정하지만 사전 신호 있으면 캡처
 
 If the user picks "Other" or writes a vague free-text answer, do not re-ask the same question — move to the next most important gap or accept the ambiguity and add `[가정: ...]` to the PRD.
+
+**Special handling for A4 (As-is steps)**: 만약 사용자가 "단계가 안 떠올라요"라고 답하면, 사용자의 Step 1 입력 + 도메인 상식을 토대로 3~5단계 초안을 직접 작성해서 보여주고 "이 흐름이 맞나요? 틀린 부분만 알려주세요" 형태로 확인. 빈 답으로 진행하지 말 것.

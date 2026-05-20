@@ -11,12 +11,22 @@ This example was produced for a non-developer marketing manager who asked for "�
 
 > Every Monday 9 AM, automatically post last week's ad campaign performance to the #marketing-weekly Slack channel so the marketing manager doesn't have to spend 1.5 hours compiling it by hand.
 
-## 0. Quick Facts (frontmatter for reviewers)
+## 0. Quick Facts & Hand-off (frontmatter for reviewers + downstream agents)
 
+> Single source of truth that `/plan` and every downstream Claude Code session reads first.
+
+**Quick Facts**
 - **Build method**: n8n (self-hosted, marketing team already operates an n8n instance)
 - **Hackathon MVP**: Trigger once a week, pull Meta Ads weekly totals only, post a static Slack message to #marketing-weekly. Google Ads + Airbridge deferred to Phase 2.
 - **Access risk**: partial — Meta Ads token confirmed available; Google Ads / Airbridge tokens need request before any integration work
 - **Category tag**: marketing-report
+
+**Hand-off rules for `/plan` and downstream agents**
+- **User technical level**: non-developer — default to n8n nodes and Google Sheet templates. Avoid Docker, microservices, framework boilerplate.
+- **Language policy**: explain in Korean. Code, file names, commit messages, n8n node names stay in English.
+- **Credential-verification rule**: Access risk is `partial`. First `/plan` step MUST be a Meta Ads token smoke test. Do NOT scaffold the full pipeline before that smoke test passes.
+- **Done = Success Criteria in section 3** (bot runs every Monday with zero manual edits for 4 consecutive weeks).
+- **Plan sequencing**: test after each n8n node addition — never bundle a 5-node import with all credentials in one step.
 
 ## 1. Problem
 

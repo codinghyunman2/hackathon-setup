@@ -9,12 +9,22 @@ Use this exact structure when translating the confirmed Korean summary to Englis
 
 > One-line summary of what this automation does, written from the user's perspective.
 
-## 0. Quick Facts (frontmatter for reviewers)
+## 0. Quick Facts & Hand-off (frontmatter for reviewers + downstream agents)
 
-- **Build method**: {Claude Code | n8n | TBD — see section 11}
+> This is the single source of truth that `/plan` and every downstream Claude Code session reads first. Keep each line tight.
+
+**Quick Facts**
+- **Build method**: {Claude Code | n8n | TBD — see section 13}
 - **Hackathon MVP**: {one-line description of what will be done in the 6-hour window}
 - **Access risk**: {none | partial — see section 12 | unknown — must verify first}
 - **Category tag**: {e.g., marketing-report | hr-onboarding | cs-triage | sales-followup | ops-monitoring}
+
+**Hand-off rules for `/plan` and downstream agents** (read these before suggesting any code)
+- **User technical level**: {non-developer | developer} — if non-developer, default to no-code or single-file scripts; avoid microservices, Docker, framework boilerplate.
+- **Language policy**: explain in Korean (conversation, plan steps, prose). Code, file names, function names, commit messages stay in English.
+- **Credential-verification rule**: before writing any integration code, confirm the user actually has the credential. If Access risk above is `partial` or `unknown`, the first plan step must be a credential verification step.
+- **Done = Success Criteria in section 3.** Do not invent additional definitions of done.
+- **Plan sequencing**: prefer recoverable, testable-after-each-step changes over bundled validation at the end.
 
 ## 1. Problem
 

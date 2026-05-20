@@ -4,6 +4,28 @@
 
 This example was produced for a non-developer marketing manager who asked for "매주 월요일 광고 성과 슬랙으로 자동 전송".
 
+## Contents
+
+Example PRD body (inside the markdown code block below) — 14 sections:
+- 0. Quick Facts & Hand-off (n8n / partial access risk / marketing-report)
+- 1. Problem (5-step As-is workflow)
+- 2. Target User (Performance Marketing Manager, non-developer)
+- 3. Goals & Success Metrics
+- 4. Scope (In scope / Out of scope)
+- 5. Inputs & Data Sources (Meta Ads / Google Ads / Airbridge / Slack)
+- 6. Output (Slack Block Kit message structure)
+- 7. Deployment & Usage
+- 8. Constraints & Non-Negotiables
+- 9. References
+- 10. Hackathon MVP (Meta Ads only, single trigger)
+- 11. Phase 2 (Google Ads + Airbridge, slash command, Block Kit button)
+- 12. Access Risk & Pre-requisites
+- 13. Build Method (n8n, with rationale)
+- 14. Assumptions
+
+After the code block:
+- "What makes this example 100점 PRD" — 10 quality criteria
+
 ---
 
 ```markdown

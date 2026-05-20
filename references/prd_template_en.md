@@ -2,6 +2,28 @@
 
 Use this exact structure when translating the confirmed Korean summary to English in Step 3. Keep section headings as written. Preserve every `[가정: ...]` marker by translating it to `[Assumption: ...]`.
 
+## Contents
+
+Template body (inside the markdown code block below) — 14 sections plus frontmatter:
+- 0. Quick Facts & Hand-off (Build method / Hackathon MVP / Access risk / Category tag + Hand-off rules)
+- 1. Problem (with As-is workflow)
+- 2. Target User
+- 3. Goals & Success Metrics
+- 4. Scope (In scope / Out of scope)
+- 5. Inputs & Data Sources
+- 6. Output
+- 7. Deployment & Usage
+- 8. Constraints & Non-Negotiables
+- 9. References
+- 10. Hackathon MVP (6-hour scope)
+- 11. Phase 2 (Post-Hackathon)
+- 12. Access Risk & Pre-requisites
+- 13. Build Method
+- 14. Assumptions
+
+After the code block:
+- Translation guidance (preservation rules, mandatory sections, final line)
+
 ---
 
 ```markdown

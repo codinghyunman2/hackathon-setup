@@ -4,6 +4,16 @@ Used in Step 2 of the workflow. Pick up to 3 of the most impactful questions per
 
 Each question below carries 2-3 example options so the AskUserQuestion call has concrete answers the user can pick. Always allow free-text input via the implicit "Other" option.
 
+## Contents
+
+- Group A — Problem clarity (A1 frequency, A2 time cost, A3 workaround, A4 as-is workflow ★ Round 1 필수)
+- Group B — Output expectation (B1 form, B2 destination, B3 cadence)
+- Group C — Scope & users (C1 user scope, C2 headcount, C3 deployment)
+- Group D — Data & integrations (D1 source, D2 auth, D3 tools)
+- Group F — Feasibility (F1 access permission ★ Round 1 필수, F2 build method)
+- Group E — Constraints (E1 hard no, E2 time budget, E3 help available)
+- Question selection heuristic (Round 1 mandatory items + Round 1 remaining slot priority)
+
 ---
 
 ## Group A — Problem clarity (use when "문제" section is thin)

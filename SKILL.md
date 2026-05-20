@@ -1,9 +1,10 @@
 ---
 name: hackathon-setup
-description: Guides a non-developer through a 5-step Korean conversation that produces docs/PRD.md and CLAUDE.md, ready to hand off to /plan. Use for internal Claude Code mini-hackathon participants who need help turning a work-automation idea into a structured spec.
-when_to_use: Invoked only by the user typing `/hackathon-setup` (this skill has `disable-model-invocation: true`, so Claude never auto-invokes it). The user should type that command when they want to set up a hackathon project, draft an automation PRD, or have Claude help structure a work problem they don't know how to brief — situations they might describe as "사내 해커톤 셋업", "해커톤 시작", "프로젝트 셋업 도와줘", "아이디어 정리해줘", "PRD 만들어줘", "자동화 설계서", or "hackathon setup". If the user describes such a situation in natural language without typing the slash command, suggest they run `/hackathon-setup` themselves rather than auto-launching the workflow.
+description: Guides a non-developer through a 5-step Korean conversation that produces docs/PRD.md and CLAUDE.md, ready to hand off to /plan. Use for internal Claude Code mini-hackathon participants who need help turning a work-automation idea into a structured spec. Invoked only by the user typing /hackathon-setup (disable-model-invocation is true, so Claude never auto-invokes it). Trigger phrases the user might use include "사내 해커톤 셋업", "해커톤 시작", "프로젝트 셋업 도와줘", "아이디어 정리해줘", "PRD 만들어줘", "자동화 설계서", or "hackathon setup". If the user describes such a situation in natural language without typing the slash command, suggest they run /hackathon-setup themselves rather than auto-launching the workflow.
 disable-model-invocation: true
 ---
+
+> Surface note: `disable-model-invocation` is a Claude Code-specific frontmatter extension. It is ignored on claude.ai and the Claude API surfaces; slash-only invocation is the intended UX for this skill on Claude Code only.
 
 # Hackathon Setup
 
@@ -364,4 +365,4 @@ Numbers are approximate (English averages ~4 chars/token, Korean ~2 chars/token)
 | Max questions per round | 3 | Hard cap — same reason |
 | Display language | Korean | All on-screen interaction stays Korean |
 | File language | English | All saved files in English; explained to user once in Step 3 |
-| Minimum Claude Code version | `v2.1.141` | AskUserQuestion popup hiding bug fixed in this version; older versions degrade the non-developer UX |
+| Minimum Claude Code version | see `references/failure_modes.md` F10 | F10 documents the UX degradation pattern on older clients; update the version floor there as the upstream client changes |

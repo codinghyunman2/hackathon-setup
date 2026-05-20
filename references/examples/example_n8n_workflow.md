@@ -4,6 +4,22 @@
 
 This example is based on a real production n8n workflow ("Store Review") used at a mobile game studio to auto-reply to Google Play / App Store reviews across multiple languages using a Gemini LLM chain. It is **standalone** — the workflow doc here is self-contained and does not depend on `example_prd.md`.
 
+## Contents
+
+Outer sections (this file):
+- Mini-PRD Context (problem / goal / MVP / build method rationale)
+- Example workflow body (inside the markdown code block below)
+- What makes this example "100점 n8n workflow doc" — quality criteria
+
+Workflow body sections (inside the code block):
+- Trigger (Schedule Trigger configuration)
+- Node Sequence (happy path — full node-by-node walkthrough with Node type / Purpose / Key config / Output)
+- Branches & Error Handling (MVP minimum — empty data + failure cases)
+- Required Credentials (n8n Credentials store table)
+- Estimated Complexity (node count / API count / build time / difficulty)
+- What this workflow does NOT cover (Phase 2 carryover from PRD section 11)
+- Visual Reference (ASCII node chain)
+
 ---
 
 ## Mini-PRD Context (for this example only)
